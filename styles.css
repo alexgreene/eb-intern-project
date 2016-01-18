@@ -1,0 +1,77 @@
+@import url(https://fonts.googleapis.com/css?family=Lato);
+
+* {
+	margin: 0;
+}
+
+html, body {
+	height:100%;
+	padding: 0;
+	font-family: 'Lato', sans-serif;
+}
+
+.header-bar {
+	background-color: orange;
+
+	color: white;
+	font-size: 1.5em;
+	height: 70px;
+	width: 100%;
+}
+
+.header-bar-center {
+	padding-top: 20px;
+	padding-left: 30px;
+}
+
+.header-title {
+	float: left;
+}
+
+.header-title-fin {
+	float:left;
+	padding-left: 5px;
+}
+
+.header-bar-center input[type=search] {
+	float: left;
+
+	-webkit-appearance: none;
+	color: white;
+  	height: 1.2em;
+  	font-size: 1em;
+	padding-left: 10px;
+	white-space: nowrap;
+	border-radius: 0;
+  	background: none;
+  	border: none;
+  	outline: none;
+  	padding-top:3px;
+  	padding-left: 0;
+  	border-bottom: thin solid white;
+}
+
+/* SEARCH INPUT * * * * * * * * * * * * */
+
+::-webkit-input-placeholder { /* WebKit, Blink, Edge */
+    color: white;
+    font-size: 1em;
+}
+:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+   color: white;
+   font-size: 1em;
+}
+::-moz-placeholder { /* Mozilla Firefox 19+ */
+   color: white;
+   font-size: 1em;
+}
+:-ms-input-placeholder { /* Internet Explorer 10-11 */
+   color: white;
+   font-size: 1em;
+}
+:placeholder-shown { /* Standard (https://drafts.csswg.org/selectors-4/#placeholder) */
+  color: white;
+  font-size: 1em;
+}
+
+/* * * * * * * * * * * * * * * * * * * */
