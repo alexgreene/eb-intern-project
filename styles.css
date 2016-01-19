@@ -51,7 +51,7 @@ html, body {
   	border-bottom: thin solid white;
 }
 
-/* SEARCH INPUT * * * * * * * * * * * * */
+/* SEARCH INPUT PLACEHOLDER * * * * * * * * * */
 
 ::-webkit-input-placeholder { /* WebKit, Blink, Edge */
     color: white;
