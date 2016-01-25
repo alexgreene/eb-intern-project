@@ -84,7 +84,7 @@ var DataRequestModule = {
       			DataRequestModule.loadingDataMessage(xmlHttp.readyState, xmlHttp.status);
       		}
 		}
-		xmlHttp.open("GET", 'http://127.0.0.1:5000/' + path, true); 
+		xmlHttp.open("GET", 'http://alexg.pythonanywhere.com/' + path, true); 
 		xmlHttp.send(null);
 	},
 
@@ -292,15 +292,23 @@ var DisplayModule = {
 					var raw = cur_data['category_freq'];
 					DisplayModule.buildPieChart( [
 			          { label: 'Arts', count: raw['Arts'] }, 
+			          { label: 'Auto, Boat & Air', count: raw['Auto, Boat & Air'] },
 			          { label: 'Business', count: raw['Business'] },
 			          { label: 'Charity & Causes', count: raw['Charity & Causes'] },
 			          { label: 'Community', count: raw['Community'] },
+			          { label: 'Family & Education', count: raw['Family & Education'] },
+			          { label: 'Fashion', count: raw['Fashion'] },
 			          { label: 'Film & Media', count: raw['Film & Media'] },
 			          { label: 'Food & Drink', count: raw['Food & Drink'] },
 			          { label: 'Government', count: raw['Government'] },
 			          { label: 'Health', count: raw['Health'] },
+			          { label: 'Hobbies', count: raw['Hobbies'] },
+			          { label: 'Holiday', count: raw['Holiday'] },
+			          { label: 'Home & Lifestyle', count: raw['Home & Lifestyle'] },
 			          { label: 'Music', count: raw['Music'] },
 			          { label: 'Science & Tech', count: raw['Science & Tech'] },
+			          { label: 'Spirituality', count: raw['Spirituality'] },
+			          { label: 'Sports & Fitness', count: raw['Sports & Fitness'] },
 			          { label: 'Travel & Outdoor', count: raw['Travel & Outdoor'] },
 			          { label: 'Other', count: raw['Other'] },
 					  { label: 'None', count: raw['None'] },
@@ -474,7 +482,7 @@ var DisplayModule = {
 		 	return { label: el.label, count: el.count ? el.count : 0 };
 		});
 
-		var legend_size = 18;
+		var legend_size = 12;
 		var legend_spacing = 4;
 
         var width = 350
