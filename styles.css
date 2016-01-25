@@ -82,7 +82,7 @@ html, body {
 	/*margin-top: 30px;*/
 	/*margin-left: 30px;*/
 	width: 100%; 
-	height: 40%;
+	height: 100%;
 	z-index: 0;
 }
 
@@ -140,6 +140,13 @@ svg {
 .pie-leg {
 	width: 120px;
 	float: right;
+}
+
+#detail {
+	font-size: 12px;
+	float: right;
+	margin-right: 30px;
+	margin-top: 5px;
 }
 
 

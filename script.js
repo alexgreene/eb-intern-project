@@ -1,6 +1,7 @@
 
 /* contains all necessary DOM refernences */
 var ui = {
+	map: document.getElementById('map'),
 	search: document.getElementById('event-search'),
 	statusmsg: document.getElementById('status-message'),
 	resultsBadge: document.getElementById('results-badge'),
@@ -176,6 +177,8 @@ var MapModule = {
 
 	/* update the map with markers at each popular event location */
 	updateMap: function(locs) {
+
+		ui.map.style.height = '40%';
 
 		/* clear the existing markers from the map */
 		if ( MapModule.cur_markers ) {
