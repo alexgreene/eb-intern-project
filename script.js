@@ -1,8 +1,8 @@
 
 /* contains all necessary DOM refernences */
 var ui = {
-	map: null,
 	search: document.getElementById('event-search'),
+	statusmsg: document.getElementById('status-message'),
 	resultsBadge: document.getElementById('results-badge'),
 	summary: document.getElementById('data-sum'),
 
@@ -41,18 +41,16 @@ DataContainer.prototype = {
 	},
 }
 
-var DataContainer = new DataContainer();
-
-
-
 /* * * * * * * * * * * * * * * * * * * * * * * * */
 /* SearchModule handles everything search related */
 var SearchModule = {
 
 	search: function() {
-		//console.log( 'SEARCH:' + sm_vars.searchInput.value );
-		ui.search.placeholder = ui.search.value;
-		DataRequestModule.getEventData(-1, ui.search.value);
+		/* search, so long as something has been entered */
+		if ( ui.search.value.replace(' ', '') !== '' ) {
+			ui.search.placeholder = ui.search.value;
+			DataRequestModule.getEventData(-1, ui.search.value);
+		}
 	},
 };
 
@@ -69,7 +67,7 @@ var DataRequestModule = {
 		else {
 
 			DataContainer.setData( JSON.parse(data) , DisplayModule.displayResults );
-			console.log( DataContainer.getData() );
+			//console.log( DataContainer.getData() );
 		}
 	}, 
 
@@ -78,12 +76,28 @@ var DataRequestModule = {
 		var xmlHttp = new XMLHttpRequest();
 		xmlHttp.onreadystatechange = function() { 
  			if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+ 				ui.statusmsg.innerHTML = '';
       			_callback(xmlHttp.responseText);
+      		}
+      		else {
+      			DataRequestModule.loadingDataMessage(xmlHttp.readyState, xmlHttp.status);
       		}
 		}
 		xmlHttp.open("GET", 'http://127.0.0.1:5000/' + path, true); 
 		xmlHttp.send(null);
 	},
+
+	locationNotFoundError: function() {
+		ui.statusmsg.innerHTML = "Sorry, couldn't find that. <br />Make sure you've entered the name of a city.";
+	},
+
+	loadingDataMessage: function(state, status) {
+		ui.statusmsg.innerHTML = 'Loading everything you want to see! ...';
+		if (state === 4 && status !== 200) {
+			DataRequestModule.locationNotFoundError();
+		}
+	},
+
 }
 
 
@@ -145,14 +159,58 @@ function decimalToTimeString(dec) {
 	return hrs + ':' + mins + ' ' + ( isPM ? 'PM' : 'AM');
 }
 
+/* * * * * * * * * * * * * * * * * * * * * * * * */
+/* MapModule handles the pretty map */
+var MapModule = {
 
+	map: null,
+	
+	cur_markers: null,
+
+	 init: function() {
+	 	L.mapbox.accessToken = 'pk.eyJ1IjoiYWxleGc0NzMiLCJhIjoiY2lmOGhvcTduMXhkdHM2bHpibGtweTN6NCJ9.vj9PrvIptfOskiEfxf8Z0g';
+	 	MapModule.map = L.mapbox.map('map', 'mapbox.streets-basic');
+	 	MapModule.map.zoomControl.removeFrom(MapModule.map);
+	 	MapModule.map.tileLayer.setOpacity(0.4); // map is not as important as the layout of markers on top of it
+	 }, 
+
+	/* update the map with markers at each popular event location */
+	updateMap: function(locs) {
+
+		/* clear the existing markers from the map */
+		if ( MapModule.cur_markers ) {
+			MapModule.map.removeLayer(MapModule.cur_markers);
+		}
+
+		/* set the map to the location of the popular event cluster */
+		MapModule.map.setView([ locs[0]['lat'], locs[0]['lon'] ], 13);
+
+		/* add the marker layer to the map */
+		MapModule.cur_markers = L.mapbox.featureLayer().addTo(MapModule.map);
+
+		/* create a marker for each of the popular event locations */
+		locs.forEach( function(loc) {
+			var mrkr = L.marker([ loc['lat'], loc['lon'] ], {
+				 	   		icon: L.icon({
+					   			iconUrl: 'assets/icon_popular.gif',
+								iconRetinaUrl: 'assets/icon_popular_2x.gif',
+								iconSize: [10, 10],
+							}),
+						});
+			MapModule.cur_markers.addLayer(mrkr);
+		});
+	},
+
+}
 
 /* * * * * * * * * * * * * * * * * * * * * * * * */
 /* Display Module handles all visual interactions */
 var DisplayModule = {
 
+	/* chart status represents whether chart has been loaded */
+	/* 0 = not yet loaded; 1 = has been loaded */
 	status: {
-		'CUR_CHART': null,
+		'CUR_CHART': null, /* id of currently displayed chart */
 		'capacity': 0,
 		'start': 0,
 		'duration': 0,
@@ -160,11 +218,13 @@ var DisplayModule = {
 		'categories': 0,
 	},
 
+	/* now that results have been recieved from out proxy,
+	   let's display them to the user */
 	displayResults: function(query) {
 
 		var cur_data = DataContainer.getData();
 
-		DisplayModule.displayMap( cur_data['locations'] );
+		MapModule.updateMap( cur_data['locations'] );
 
 		DisplayModule.displayResultsCount( cur_data['num_events'] );
 
@@ -175,6 +235,8 @@ var DisplayModule = {
 
 	},
 
+	/* display the chart/graph corresponding to the metric that
+	   the user click on from the text summary */
 	scrollToChart: function(chart_id) {
 
 		var cur_data = DataContainer.getData();
@@ -265,34 +327,17 @@ var DisplayModule = {
 		DisplayModule.status.CUR_CHART = chart_id;
 	},
 
-	displayMap: function(locs) {
-		
-		// mapbox public access key
-		L.mapbox.accessToken = 'pk.eyJ1IjoiYWxleGc0NzMiLCJhIjoiY2lmOGhvcTduMXhkdHM2bHpibGtweTN6NCJ9.vj9PrvIptfOskiEfxf8Z0g';
-		ui.map = L.mapbox.map('map', 'mapbox.streets-basic');	
-		ui.map.setView([ locs[0]['lat'], locs[0]['lon'] ], 13); // init map to markers
-		ui.map.zoomControl.removeFrom(ui.map);
-		
-		ui.map.tileLayer.setOpacity(0.4); // map is not as important as the layout of markers on top of it
-
-		locs.forEach( function(loc) {
-			L.marker([ loc['lat'], loc['lon'] ], {
-				 icon: L.icon({
-					   		iconUrl: 'assets/icon_popular.gif',
-							iconRetinaUrl: 'assets/icon_popular_2x.gif',
-							iconSize: [10, 10],
-						}),
-			}).addTo(ui.map);
-		});
-	},
-
+	/* display the number of popular events being analyzed, 
+	   as a badge layered on top of the map */
 	displayResultsCount: function(num) {
 		ui.resultsBadge.style.visibility = 'visible';
 		ui.resultsBadge.children[0].innerHTML = num;
 	},
 
+	/* display a textual summary of event statistics */
 	generateSummary: function(avg_start, avg_dur, avg_until, avg_cap, pop_day, pop_cats) {
 
+		/* wall of text that looks much better styled */
 		ui[ 'summary' ].innerHTML = 'The average popular event in ' + ui.search.value.toUpperCase() + 
 			' begins at <span id="span_start" class="sum-span" >' + decimalToTimeString(avg_start) + 
 			'</span>, is <span id="span_dur" class="sum-span" >' + avg_dur.toFixed(1) + 
@@ -303,11 +348,12 @@ var DisplayModule = {
 			'Events are well planned in this area, posted to Eventbrite an average of ' + 
 			avg_until.toFixed(0) + ' days before they take place.';
 
+		/* summary span DOM references, because we just created them */
 		span_start = document.getElementById('span_start');
 		span_dur = document.getElementById('span_dur');
 		span_cap = document.getElementById('span_cap');
 
-		/* action listeners */
+		/* add the event listeners for the summary spans */
 		span_start.addEventListener('click', function() {
 			DisplayModule.scrollToChart('start');
 		});
@@ -331,6 +377,7 @@ var DisplayModule = {
 		ui[ 'summary' ].classList.remove('no-vis');
 	},
 
+	/* display a histogram of provided data */
 	buildHistogram: function(raw, x_label, id, bins, bounds) {
 
 		var data = raw.map( function(el) {
@@ -417,6 +464,7 @@ var DisplayModule = {
 
 	}, 
 
+	/* display a pie chart of the provided data */
 	buildPieChart: function(dataset, el, legend) {
 
 		var dataset = dataset.map( function(el) {
@@ -489,3 +537,7 @@ var DisplayModule = {
 
 	},
 }
+
+/* APPLICATION INIT */
+var DataContainer = new DataContainer();
+MapModule.init();

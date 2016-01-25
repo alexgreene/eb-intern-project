@@ -29,6 +29,8 @@ def data(location):
 	api_resp = requests.get('https://www.eventbriteapi.com/v3/events/search/?popular=yes&venue.city=' + location + '&start_date.range_end=' + thirty_days + '&sort_by=best&expand=category,venue&token=' + config['eb_token'])
 	api_json = api_resp.json()
 
+	print api_json
+	
 	return_data = {}
 	return_data['locations'] = []
 	return_data['num_events'] = 0
